@@ -5,6 +5,10 @@
  *      Author: eleve
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL2/SDL.h>
+
 struct s_square*SquareNew(
 		struct 	s_square*pSquare,
 		int 	iLocX,

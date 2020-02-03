@@ -7,6 +7,7 @@
 
 
 #include "app.h"
+#include "square.h"
 
 enum APP_STATUS {
 	ST_ALL_CLEARED = 0x00000000,

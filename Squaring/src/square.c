@@ -30,7 +30,8 @@ struct s_square*SquareNew(
 
 	pSquareNew->frame.x = iLocX;
 	pSquareNew->frame.y = iLocY;
-	pSquareNew->frame. = iSize;
+	pSquareNew->frame.h = iSize;
+	pSquareNew->frame.w = iSize;
 	pSquareNew->speed.x = iSpeedX;
 	pSquareNew->speed.y = iSpeedY;
 	pSquareNew->color.r = uRed;
@@ -39,4 +40,22 @@ struct s_square*SquareNew(
 	pSquareNew->color.a = uAlpha;
 
 	return pSquareNew;
+}
+
+
+struct s_square*SquareDel(
+		struct s_square*pSquare,
+		SDL_Renderer*pRenderer,
+		SDL_Color	 colorBkgnd
+) {
+	struct s_square* pSquareDel;
+
+	pSquareDel = pSquare;
+
+
+
+	free(pSquareDel);
+	pSquareDel = NULL;
+
+	return pSquareDel;
 }
