@@ -29,7 +29,7 @@ all: Squaring
 Squaring: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "Squaring" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L/usr/include/SDL2 -o "Squaring" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
