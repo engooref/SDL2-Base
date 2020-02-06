@@ -7,6 +7,9 @@
 
 
 #include "app.h"
+#include "square.h"
+
+Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam);
 
 
 enum APP_STATUS {
@@ -22,6 +25,10 @@ static struct {
 	SDL_Color			colorBkgnd;
 	SDL_Point			windowSize;
 	SDL_TimerID			nTimerID;
+
+	struct s_square*    pSquare;
+	struct s_square*    pSquare2;
+
 }app;
 
 int AppNew(char*strWinTitle){
@@ -71,10 +78,22 @@ int AppNew(char*strWinTitle){
 		fprintf(stderr, "Software renderer created instead!\n");
 	}
 
-	return 0;
+	app.pSquare = SquareNew(NULL, 50, 50, SQUARE_SIZE, 0, 0, 60, 50, 40, 150);
+	app.pSquare = SquareDraw(app.pSquare, app.pRenderer);
+
+	app.pSquare2 = SquareNew(NULL, 150, 250, SQUARE_SIZE, 0, 0, 90, 250, 80, 250);
+	app.pSquare2 = SquareDraw(app.pSquare2, app.pRenderer);
+
+		SDL_RenderPresent(app.pRenderer);
+
+		return 0;
 }
 
 int AppDel(void){
+
+	app.pSquare = SquareDel(app.pSquare, app.pRenderer, app.colorBkgnd);
+
+	app.pSquare2 = SquareDel(app.pSquare2, app.pRenderer, app.colorBkgnd);
 
 	if(app.pWindow){
 		SDL_DestroyWindow(app.pWindow);
@@ -90,6 +109,7 @@ int AppDel(void){
 }
 
 int AppRun(void){
+
 
 	int quit;
 	SDL_Event event;
@@ -128,4 +148,11 @@ int AppRun(void){
 		}
 	}
 	return 0;
+}
+
+Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam){
+
+	SquareMove(app.pSquare, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SDL_RenderPresent(app.pRenderer);
+	return interval;
 }
