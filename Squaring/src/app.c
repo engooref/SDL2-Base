@@ -78,18 +78,22 @@ int AppNew(char*strWinTitle){
 		fprintf(stderr, "Software renderer created instead!\n");
 	}
 
-	app.pSquare = SquareNew(NULL, 50, 50, SQUARE_SIZE, 0, 0, 60, 50, 40, 150);
+	app.pSquare = SquareNew(NULL, 50, 50, SQUARE_SIZE, 15, 10, 60, 50, 40, 150);
 	app.pSquare = SquareDraw(app.pSquare, app.pRenderer);
 
-	app.pSquare2 = SquareNew(NULL, 150, 250, SQUARE_SIZE, 0, 0, 90, 250, 80, 250);
+	app.pSquare2 = SquareNew(NULL, 150, 250, SQUARE_SIZE, 20, 20, 90, 250, 80, 250);
 	app.pSquare2 = SquareDraw(app.pSquare2, app.pRenderer);
 
 		SDL_RenderPresent(app.pRenderer);
+
+		app.nTimerID = SDL_AddTimer(ANIMATION_TICK, _AppAnimateCallBack, NULL);
 
 		return 0;
 }
 
 int AppDel(void){
+
+	SDL_RemoveTimer(app.nTimerID);
 
 	app.pSquare = SquareDel(app.pSquare, app.pRenderer, app.colorBkgnd);
 
@@ -152,7 +156,10 @@ int AppRun(void){
 
 Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam){
 
+
 	SquareMove(app.pSquare, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	SquareMove(app.pSquare2, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
 	SDL_RenderPresent(app.pRenderer);
 	return interval;
 }

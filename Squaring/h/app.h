@@ -14,7 +14,7 @@
 #define SCREEN_WIDTH 		 (640*5.0/3.0)
 #define SCREEN_HEIGHT 		 (480*5.0/3.0)
 #define ANIMATION_TICK		 (16)
-#define SQUARE_SIZE		     10
+#define SQUARE_SIZE		     30
 
 #define mBitsSet(f,m)		 ((f)|=(m))
 #define mBitsClr(f,m)		 ((f)&=(~(m)))

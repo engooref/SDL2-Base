@@ -74,7 +74,6 @@ struct s_square*SquareHide(
 ){
 	SDL_SetRenderDrawColor(pRenderer, colorBkgnd.r, colorBkgnd.g, colorBkgnd.b, colorBkgnd.a);
 		SDL_RenderFillRect(pRenderer, &pSquare->frame);
-		SDL_RenderPresent(pRenderer);
 		return pSquare;
 }
 
@@ -89,10 +88,10 @@ struct s_square*SquareMove(
 	SquareHide(pSquare, pRenderer, colorBkgnd);
 
 	pSquare->frame.x += pSquare->speed.x;
-	if((pSquare->frame.x < 0) || (pSquare->frame.x > iWmax)) pSquare->frame.x *= -1;
+	if((pSquare->frame.x < 0) || (pSquare->frame.x > iWmax)) pSquare->speed.x *= -1;
 
 	pSquare->frame.y += pSquare->speed.y;
-	if((pSquare->frame.y < 0) || (pSquare->frame.y > iHmax)) pSquare->frame.y *= -1;
+	if((pSquare->frame.y < 0) || (pSquare->frame.y > iHmax)) pSquare->speed.y *= -1;
 
 	SquareDraw(pSquare, pRenderer);
 
