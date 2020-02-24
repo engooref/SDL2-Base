@@ -47,3 +47,7 @@ struct s_square*SquareMove(
 		int			 iWmax,
 		int			 iHmax
 );
+
+struct s_square*SquareNext(struct s_square*pSquare);
+
+struct s_square*SquareAdd(struct s_square*pSquare, struct s_square*pNew);

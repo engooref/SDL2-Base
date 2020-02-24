@@ -10,7 +10,9 @@
 #include "square.h"
 
 Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam);
-
+void   _AppCreateSquare(int x, int y);
+void _AppMouseButtonUp(SDL_Event*pEvent);
+void _AppDeleteSquare(void);
 
 enum APP_STATUS {
 	ST_ALL_CLEARED = 0x00000000,
@@ -20,18 +22,19 @@ enum APP_STATUS {
 static struct {
 	Uint32				nStatus;
 	Uint32				nWindowID;
-	SDL_Window*			pWindow;
-	SDL_Renderer*		pRenderer;
+	SDL_Window		*	pWindow;
+	SDL_Renderer    *	pRenderer;
 	SDL_Color			colorBkgnd;
 	SDL_Point			windowSize;
 	SDL_TimerID			nTimerID;
 
-	struct s_square*    pSquare;
-	struct s_square*    pSquare2;
 
+	//struct s_square *  pSquares[NB_SQUARES];
+	struct s_square *	pSquares;
 }app;
 
 int AppNew(char*strWinTitle){
+
 	app.nStatus			= ST_ALL_CLEARED;
 	app.nWindowID		= -1;
 	app.pRenderer		= NULL;
@@ -40,8 +43,10 @@ int AppNew(char*strWinTitle){
 	app.colorBkgnd.g	= 0;
 	app.colorBkgnd.b	= 0;
 	app.colorBkgnd.a	= 255;
+	app.pSquares 		= NULL;
 
 	srand((unsigned int)time(NULL));
+
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "SDL video init failed: %s\n", SDL_GetError());
@@ -64,6 +69,8 @@ int AppNew(char*strWinTitle){
 	}
 
 	app.nWindowID = SDL_GetWindowID(app.pWindow);
+	SDL_GetWindowSize(app.pWindow, &app.windowSize.x, &app.windowSize.y);
+
 	app.pRenderer = SDL_CreateRenderer(app.pWindow,-1, SDL_RENDERER_ACCELERATED);
 	if(app.pRenderer==NULL) {
 		fprintf(stderr, "Failed to create accelerated renderer.\n");
@@ -78,26 +85,51 @@ int AppNew(char*strWinTitle){
 		fprintf(stderr, "Software renderer created instead!\n");
 	}
 
-	app.pSquare = SquareNew(NULL, 50, 50, SQUARE_SIZE, 15, 10, 60, 50, 40, 150);
-	app.pSquare = SquareDraw(app.pSquare, app.pRenderer);
 
-	app.pSquare2 = SquareNew(NULL, 150, 250, SQUARE_SIZE, 20, 20, 90, 250, 80, 250);
-	app.pSquare2 = SquareDraw(app.pSquare2, app.pRenderer);
+	/*SDL_Point speed;
 
-		SDL_RenderPresent(app.pRenderer);
+	for(int nbCreateSquares = 0; nbCreateSquares < NB_SQUARES; nbCreateSquares++) {
+		do {
+		speed.x = rand() % (SPEED_MAX - SPEED_MIN + 1) - SPEED_MAX;
+		speed.y = rand() % (SPEED_MAX - SPEED_MIN + 1) - SPEED_MAX;
+		} while(speed.x == 0 || speed.y == 0);
 
-		app.nTimerID = SDL_AddTimer(ANIMATION_TICK, _AppAnimateCallBack, NULL);
+		app.pSquares[nbCreateSquares] = SquareNew(NULL,
+									rand() % (app.windowSize.x - SQUARE_SIZE),
+									rand() % (app.windowSize.y - SQUARE_SIZE),
+									SQUARE_SIZE,
+									speed.x,
+									speed.y,
+									rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+									rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+									rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+									rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN);
 
-		return 0;
+		app.pSquares[nbCreateSquares] = SquareDraw(app.pSquares[nbCreateSquares], app.pRenderer);
+
+	}*/
+	SDL_RenderPresent(app.pRenderer);
+
+
+
+	app.nTimerID = SDL_AddTimer(ANIMATION_TICK, _AppAnimateCallBack, NULL);
+
+	return 0;
 }
 
 int AppDel(void){
 
+	/*for(int k = 0; k < NB_SQUARES; k++){
+		if(app.pSquares[k] != NULL)
+			app.pSquares[k] = SquareDel(app.pSquares[k], app.pRenderer, app.colorBkgnd);
+	}*/
+
+	while(app.pSquares != NULL)
+	{
+		app.pSquares = SquareDel(app.pSquares, app.pRenderer, app.colorBkgnd);
+	}
+
 	SDL_RemoveTimer(app.nTimerID);
-
-	app.pSquare = SquareDel(app.pSquare, app.pRenderer, app.colorBkgnd);
-
-	app.pSquare2 = SquareDel(app.pSquare2, app.pRenderer, app.colorBkgnd);
 
 	if(app.pWindow){
 		SDL_DestroyWindow(app.pWindow);
@@ -113,7 +145,6 @@ int AppDel(void){
 }
 
 int AppRun(void){
-
 
 	int quit;
 	SDL_Event event;
@@ -142,9 +173,18 @@ int AppRun(void){
 				case SDLK_ESCAPE:
 						quit =1;
 						break;
+				case SDLK_SPACE:
+					_AppCreateSquare(rand() % (app.windowSize.x - SQUARE_SIZE), rand() % (app.windowSize.y - SQUARE_SIZE));
+					break;
+				case SDLK_BACKSPACE:
+							_AppDeleteSquare();
+					break;
 				default:
 					break;
 				}
+				break;
+			case SDL_MOUSEBUTTONUP:
+				 _AppMouseButtonUp(&event);
 				break;
 			default:
 				break;
@@ -156,10 +196,84 @@ int AppRun(void){
 
 Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam){
 
+	/*for(int k = 0; k < NB_SQUARES; k++){
+		if(app.pSquares[k] != NULL)
+			SquareMove(app.pSquares[k], app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+	}*/
 
-	SquareMove(app.pSquare, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+	struct s_square* pScan;
+	pScan = app.pSquares;
+	while(pScan != NULL) {
+		pScan = SquareMove(pScan, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+	}
 
-	SquareMove(app.pSquare2, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
 	SDL_RenderPresent(app.pRenderer);
 	return interval;
+}
+
+void _AppCreateSquare(int x, int y){
+
+
+	SDL_Point speed;
+
+	do {
+	speed.x = rand() % (SPEED_MAX - SPEED_MIN + 1) - SPEED_MAX;
+	speed.y = rand() % (SPEED_MAX - SPEED_MIN + 1) - SPEED_MAX;
+	} while(speed.x == 0 || speed.y == 0);
+
+
+	if(app.pSquares == NULL) {
+
+		app.pSquares = SquareNew(
+						NULL,
+						x,
+						y,
+						SQUARE_SIZE,
+						speed.x,
+						speed.y,
+						rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+						rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+						rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+						255
+					);
+
+		app.pSquares = SquareDraw(app.pSquares, app.pRenderer);
+
+	} else {
+		struct s_square* pScan;
+		pScan = app.pSquares;
+		while(SquareNext(pScan) != NULL) { pScan = SquareNext(pScan); }
+
+		SquareAdd(pScan, SquareNew(
+							NULL,
+							x,
+							y,
+							SQUARE_SIZE,
+							speed.x,
+							speed.y,
+							rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+							rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+							rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
+							255
+						)
+		);
+	}
+
+
+}
+
+void _AppMouseButtonUp(SDL_Event*pEvent) {
+
+	if (pEvent->button.button != SDL_BUTTON_LEFT) return;
+
+	int x, y;
+
+	x = pEvent->motion.x;
+	y = pEvent->motion.y;
+
+	_AppCreateSquare(x, y);
+}
+
+void _AppDeleteSquare(void){
+
 }
