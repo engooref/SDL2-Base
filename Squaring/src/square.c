@@ -115,6 +115,25 @@ struct s_square*SquareAdd(struct s_square*pSquare, struct s_square*pNew){
 	return pSquare->pNext;
 }
 
-//struct s_square*SquareCollision(struct s_square*pSquare, structs_square*pNext) {
+struct s_square*SquareCollision(struct s_square*pSquareA,
+								struct s_square*pSquareB,
+								SDL_Renderer*	pRenderer,
+								SDL_Color 		colorBkgnd) {
 
-//}
+	struct s_square*pScan;
+	pScan = pSquareB;
+
+	if(SDL_HasIntersection(&pSquareA->frame, &pSquareB->frame)) {
+		/*pSquareA->speed.x *= -1;
+		pSquareA->speed.y *= -1;
+
+		pSquareB->speed.x *= -1;
+		pSquareB->speed.y *= -1;
+	*/
+		pScan = pSquareA;
+
+		while(pScan->pNext != pSquareB) {pScan = pScan->pNext; }
+		pScan = SquareDel(pSquareB, pRenderer, colorBkgnd);
+	}
+	return pScan->pNext;
+}

@@ -51,3 +51,8 @@ struct s_square*SquareMove(
 struct s_square*SquareNext(struct s_square*pSquare);
 
 struct s_square*SquareAdd(struct s_square*pSquare, struct s_square*pNew);
+
+struct s_square*SquareCollision(struct s_square*pSquare,
+								struct s_square*pNext,
+								SDL_Renderer*	pRenderer,
+								SDL_Color colorBkgnd);
