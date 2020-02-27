@@ -27,6 +27,7 @@ static struct {
 	SDL_Color			colorBkgnd;
 	SDL_Point			windowSize;
 	SDL_TimerID			nTimerID;
+	int					nbSquares;
 
 
 	//struct s_square *  pSquares[NB_SQUARES];
@@ -44,6 +45,7 @@ int AppNew(char*strWinTitle){
 	app.colorBkgnd.b	= 0;
 	app.colorBkgnd.a	= 255;
 	app.pSquares 		= NULL;
+	app.nbSquares 		= 0;
 
 	srand((unsigned int)time(NULL));
 
@@ -176,9 +178,6 @@ int AppRun(void){
 				case SDLK_SPACE:
 					_AppCreateSquare(rand() % (app.windowSize.x - SQUARE_SIZE), rand() % (app.windowSize.y - SQUARE_SIZE));
 					break;
-				case SDLK_BACKSPACE:
-							_AppDeleteSquare();
-					break;
 				default:
 					break;
 				}
@@ -207,19 +206,22 @@ Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam){
 		pScan = SquareMove(pScan, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
 	}
 
+	/*pScan = app.pSquares;
+		while(pScan != NULL) {
+			pNext = SquareCollision(pScan, pNext);
+		}*/
 	SDL_RenderPresent(app.pRenderer);
 	return interval;
 }
 
 void _AppCreateSquare(int x, int y){
 
-
+	char buf[8];
 	SDL_Point speed;
 
-	do {
 	speed.x = rand() % (SPEED_MAX - SPEED_MIN + 1) - SPEED_MAX;
 	speed.y = rand() % (SPEED_MAX - SPEED_MIN + 1) - SPEED_MAX;
-	} while(speed.x == 0 || speed.y == 0);
+
 
 
 	if(app.pSquares == NULL) {
@@ -236,8 +238,6 @@ void _AppCreateSquare(int x, int y){
 						rand() % (COLOR_MAX - COLOR_MIN + 1) - COLOR_MIN,
 						255
 					);
-
-		app.pSquares = SquareDraw(app.pSquares, app.pRenderer);
 
 	} else {
 		struct s_square* pScan;
@@ -257,23 +257,28 @@ void _AppCreateSquare(int x, int y){
 							255
 						)
 		);
+
+
 	}
+	sprintf(buf, "%d", ++app.nbSquares);
+	SDL_SetWindowTitle(app.pWindow, buf);
 
 
 }
 
 void _AppMouseButtonUp(SDL_Event*pEvent) {
 
-	if (pEvent->button.button != SDL_BUTTON_LEFT) return;
 
 	int x, y;
 
 	x = pEvent->motion.x;
 	y = pEvent->motion.y;
 
-	_AppCreateSquare(x, y);
+	if (pEvent->button.button == SDL_BUTTON_LEFT)  { _AppCreateSquare(x, y); }
+	else { _AppDeleteSquare(); }
 }
 
 void _AppDeleteSquare(void){
 
+		if (app.pSquares != NULL) {app.pSquares = SquareDel(app.pSquares, app.pRenderer, app.colorBkgnd); }
 }

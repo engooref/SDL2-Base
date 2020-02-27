@@ -114,3 +114,7 @@ struct s_square*SquareAdd(struct s_square*pSquare, struct s_square*pNew){
 	pSquare->pNext = pNew;
 	return pSquare->pNext;
 }
+
+//struct s_square*SquareCollision(struct s_square*pSquare, structs_square*pNext) {
+
+//}
