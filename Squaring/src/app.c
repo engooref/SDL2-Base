@@ -201,19 +201,27 @@ Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam){
 	}*/
 
 	struct s_square* pScan, *pNext;
+	char buf[8];
+	int k = 0;
+
 	pScan = app.pSquares;
 	while(pScan != NULL) {
 		pScan = SquareMove(pScan, app.pRenderer, app.colorBkgnd, SCREEN_WIDTH, SCREEN_HEIGHT);
+		k++;
+
 	}
+	/*sprintf(buf, "%d", k);
+	SDL_SetWindowTitle(app.pWindow, buf);*/
 
 	pScan = app.pSquares;
 	while(pScan != NULL) {
 		pNext = SquareNext(pScan);
 
 		while (pNext != NULL) {
-			pNext = SquareCollision(pScan, pNext, app.pRenderer, app.colorBkgnd);
+			pNext = SquareCollision(pScan, pNext, app.pSquares, app.pRenderer, app.colorBkgnd);
+
 		}
-		pScan =SquareNext(pScan);
+		pScan = SquareNext(pScan);
 	}
 
 	SDL_RenderPresent(app.pRenderer);
@@ -223,7 +231,6 @@ Uint32 _AppAnimateCallBack(Uint32 interval, void*pParam){
 
 void _AppCreateSquare(int x, int y){
 
-	char buf[8];
 	SDL_Point speed;
 
 	speed.x = rand() % (SPEED_MAX - SPEED_MIN + 1) - SPEED_MAX;
@@ -264,20 +271,13 @@ void _AppCreateSquare(int x, int y){
 							255
 						)
 		);
-
-
 	}
-	sprintf(buf, "%d", ++app.nbSquares);
-	SDL_SetWindowTitle(app.pWindow, buf);
-
-
 }
 
 void _AppMouseButtonUp(SDL_Event*pEvent) {
 
 
 	int x, y;
-	char buf[8];
 
 	x = pEvent->motion.x;
 	y = pEvent->motion.y;
@@ -286,8 +286,6 @@ void _AppMouseButtonUp(SDL_Event*pEvent) {
 	else {
 		if (app.pSquares != NULL) {
 			app.pSquares = SquareDel(app.pSquares, app.pRenderer, app.colorBkgnd);
-			sprintf(buf, "%d", --app.nbSquares);
-			SDL_SetWindowTitle(app.pWindow, buf);
 		}
 	}
 }

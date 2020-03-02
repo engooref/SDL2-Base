@@ -12,6 +12,7 @@ struct s_square {
 	SDL_Color 			color;
 	SDL_Rect 			frame;
 	SDL_Point 			speed;
+	int					nbCollision;
 	struct s_square*	pNext;
 };
 
@@ -44,6 +45,8 @@ struct s_square*SquareNew(
 	pSquareNew->color.b = uBlue;
 	pSquareNew->color.a = uAlpha;
 
+	pSquareNew->nbCollision = 0;
+
 	pSquareNew->pNext = NULL;
 
 	return pSquareNew;
@@ -59,7 +62,7 @@ struct s_square*SquareDel(
 	pNext = pSquare->pNext;
 
 	SquareHide(pSquare, pRenderer, colorBkgnd);
-	SDL_RenderPresent(pRenderer);
+	//SDL_RenderPresent(pRenderer);
 	free(pSquare);
 
 	return pNext;
@@ -96,10 +99,10 @@ struct s_square*SquareMove(
 	SquareHide(pSquare, pRenderer, colorBkgnd);
 
 	pSquare->frame.x += pSquare->speed.x;
-	if((pSquare->frame.x < 0) || (pSquare->frame.x >= iWmax - SQUARE_SIZE)) pSquare->speed.x *= -1;
+	if((pSquare->frame.x < 0) || (pSquare->frame.x >= iWmax - pSquare->frame.w)) pSquare->speed.x *= -1;
 
 	pSquare->frame.y += pSquare->speed.y;
-	if((pSquare->frame.y < 0) || (pSquare->frame.y >= iHmax - SQUARE_SIZE)) pSquare->speed.y *= -1;
+	if((pSquare->frame.y < 0) || (pSquare->frame.y >= iHmax - pSquare->frame.h)) pSquare->speed.y *= -1;
 
 	SquareDraw(pSquare, pRenderer);
 
@@ -115,25 +118,46 @@ struct s_square*SquareAdd(struct s_square*pSquare, struct s_square*pNew){
 	return pSquare->pNext;
 }
 
-struct s_square*SquareCollision(struct s_square*pSquareA,
-								struct s_square*pSquareB,
-								SDL_Renderer*	pRenderer,
-								SDL_Color 		colorBkgnd) {
+struct s_square*SquareCollision(struct s_square*	pSquareA,
+								struct s_square*	pSquareB,
+								struct s_square* 	pSquare,
+								SDL_Renderer   *	pRenderer,
+								SDL_Color 			colorBkgnd) {
+
 
 	struct s_square*pScan;
-	pScan = pSquareB;
 
 	if(SDL_HasIntersection(&pSquareA->frame, &pSquareB->frame)) {
-		/*pSquareA->speed.x *= -1;
+		pSquareA->speed.x *= -1;
 		pSquareA->speed.y *= -1;
 
-		pSquareB->speed.x *= -1;
+		/*pSquareB->speed.x *= -1;
 		pSquareB->speed.y *= -1;
 	*/
 		pScan = pSquareA;
 
+		/*if ( (pSquareA->frame.h <= (SQUARE_SIZE * 2)) && (pSquareA->frame.w <= (SQUARE_SIZE * 2)) ) {
+					pSquareA->frame.h += pSquareB->frame.h;
+					pSquareA->frame.w += pSquareB->frame.w;
+
+		}
+		else {
+			pSquareA->frame.h = SQUARE_SIZE ;
+			pSquareA->frame.w = SQUARE_SIZE ;
+			SDL_RenderPresent(pRenderer);
+		}*/
 		while(pScan->pNext != pSquareB) {pScan = pScan->pNext; }
-		pScan = SquareDel(pSquareB, pRenderer, colorBkgnd);
+
+		pScan->pNext = SquareDel(pSquareB, pRenderer, colorBkgnd);
+		pSquareA->nbCollision++;
+		pSquareB =pScan;
+
+
+		if(pSquareA->nbCollision == 10) {
+			pScan = pSquare;
+			while(pScan->pNext != pSquareA) {pScan = pScan->pNext; }
+			pScan->pNext = SquareDel(pSquareA, pRenderer, colorBkgnd);
+		}
 	}
-	return pScan->pNext;
+	return pSquareB->pNext;
 }
